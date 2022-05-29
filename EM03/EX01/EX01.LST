@@ -1,0 +1,75 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 29-Apr-21 19:42 Page   1
+*                                       EX01.CBL
+* Options: LIST(EX01.LST) ASMLIST(EX01.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.    EX01.
+     3 AUTHOR.        GABRIEL FRANKLIN
+     4                REBECCA M M MURAD
+     5                WILLIAN KOHATSU.
+     6 INSTALLATION.  HOME.
+     7 DATE-WRITTEN.  27-04-2021.
+     8 DATE-COMPILED. 29-Apr-21 19:42.
+     9 SECURITY.      APENAS O AUTOR PODE MODIFICAR.
+    10*REMARKS.       LER TODOS REGISTROS E ORDENAR CRESCENTE.
+    11
+    12 ENVIRONMENT DIVISION.
+    13 CONFIGURATION SECTION.
+    14    SOURCE-COMPUTER.   DELL-PC.
+    15    OBJECT-COMPUTER.   DELL-PC.
+    16    SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    17
+    18 INPUT-OUTPUT SECTION.
+    19 FILE-CONTROL.
+    20
+    21    SELECT  CADENT  ASSIGN TO DISK
+    22    ORGANIZATION  IS  LINE SEQUENTIAL.
+    23
+    24    SELECT  TRAB  ASSIGN  TO DISK.
+    25
+    26    SELECT  CADFILME  ASSIGN TO DISK
+    27    ORGANIZATION  IS  LINE SEQUENTIAL.
+    28
+    29  DATA DIVISION.
+    30  FILE SECTION.
+    31
+    32 FD CADENT
+    33    LABEL  RECORD ARE STANDARD
+    34    VALUE OF FILE-ID IS "CADENT.DAT".
+    35
+    36 01 REG-ENT.
+    37    02 COD-ENT         PIC 9(05).
+    38    02 NOME-ENT        PIC X(30).
+    39    02 PRECO-ENT       PIC 9(02)V99.
+    40
+    41 SD TRAB.
+    42 01 REG-TRAB.
+    43    02 COD-TRAB     PIC 9(05).
+    44    02 NOME-TRAB    PIC X(30).
+    45    02 PRECO-TRAB   PIC 9(02)V99.
+    46
+    47 FD CADFILME
+    48    LABEL RECORD ARE  STANDARD
+    49    VALUE  OF FILE-ID IS "CADFILME.DAT".
+    50
+    51 01 REG-SAI.
+    52    02 COD-SAI         PIC 9(05).
+    53    02 NOME-SAI        PIC X(30).
+    54    02 PRECO-SAI       PIC 9(02)V99.
+    55
+    56 PROCEDURE  DIVISION.
+    57
+* Microsoft COBOL Version 4.5        L2.4 revision 002 29-Apr-21 19:42 Page   2
+*                                       EX01.CBL
+    58 EM03-EX01.
+    59
+    60    SORT    TRAB
+    61    ASCENDING KEY  NOME-TRAB
+    62       USING  CADENT
+    63       GIVING CADFILME.
+    64 STOP RUN.
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1260     Code:         265     Dictionary:        1214
