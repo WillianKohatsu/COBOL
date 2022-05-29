@@ -1,0 +1,192 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 16-Mar-21 21:16 Page   1
+*                                       EX02.CBL
+* Options: LIST(EX02.LST) ASMLIST(EX02.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.      EX02.
+     3 AUTHOR.          REBECCA M M MURAD
+     4                  WILLIAN KOHATSU.
+     5 INSTALLATION.    HOME.
+     6 DATE-WRITTEN.    16-03-2021.
+     7 DATE-COMPILED. 16-Mar-21 21:16.
+     8 SECURITY.        APENAS O AUTOR.
+     9*REMARKS.     LER ARQUIVO CADENT E IMPRIMIR UM RELATORIO.
+    10
+    11 ENVIRONMENT DIVISION.
+    12 CONFIGURATION SECTION.
+    13    SOURCE-COMPUTER.   DELL-PC.
+    14    OBJECT-COMPUTER.   DELL-PC.
+    15    SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    16
+    17 INPUT-OUTPUT SECTION.
+    18 FILE-CONTROL.
+    19
+    20    SELECT  CADENT  ASSIGN TO DISK
+    21    ORGANIZATION  IS  LINE SEQUENTIAL.
+    22
+    23    SELECT  RELSAI  ASSIGN TO DISK.
+    24
+    25 DATA DIVISION.
+    26 FILE SECTION.
+    27
+    28 FD CADENT
+    29    LABEL  RECORD  ARE  STANDARD
+    30    VALUE  OF FILE-ID  IS  "CADENT.DAT".
+    31
+    32 01  REG-ENT.
+    33    02 COD-ENT                PIC 9(07).
+    34    02 NOME-ENT               PIC X(25).
+    35    02 CARGO                  PIC X(10).
+    36    02 GRUPO-RISCO            PIC X(01).
+    37    02 FATOR-ENT              PIC X(10).
+    38
+    39 FD RELSAI
+    40    LABEL  RECORD  IS  OMITTED.
+    41
+    42 01  REG-ATR        PIC X(80).
+    43
+    44 WORKING-STORAGE SECTION.
+    45
+    46 77  FIM-ARQ          PIC X(03)     VALUE   "NAO".
+    47 77  CT-LIN           PIC 9(002)    VALUE   20.
+    48 77  CT-PAG           PIC 9(002)    VALUE   ZEROS.
+    49 77  TOTAL-FUNC       PIC ZZZ9      VALUE   ZEROS.
+    50
+    51 01  CAB-01.
+    52    02  FILLER        PIC X(70)     VALUE   SPACES.
+    53    02  FILLER        PIC X(05)     VALUE   "PAG.".
+    54    02  VAR-PAG       PIC Z9.
+    55    02  FILLER        PIC X(03)     VALUE   SPACES.
+    56
+    57 01  CAB-02.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 16-Mar-21 21:16 Page   2
+*                                       EX02.CBL
+    58    02  FILLER        PIC X(26)     VALUE   SPACES.
+    59    02  FILLER        PIC X(16)     VALUE
+    60                        "FUNCIONARIOS QUE".
+    61    02  FILLER        PIC X(01)     VALUE   SPACES.
+    62    02  FILLER        PIC X(12)     VALUE
+    63                        "PERTENCEM AO".
+    64    02  FILLER        PIC X(25)     VALUE   SPACES.
+    65
+    66 01  CAB-03.
+    67    02  FILLER        PIC X(27)     VALUE   SPACES.
+    68    02  FILLER        PIC X(14)     VALUE
+    69                        "GRUPO DE RISCO".
+    70    02  FILLER        PIC X(01)     VALUE   SPACES.
+    71    02  FILLER        PIC X(11)     VALUE
+    72                        "DA COVID-19".
+    73    02  FILLWE        PIC X(27)     VALUE   SPACES.
+    74
+    75 01  CAB-04.
+    76    02  FILLER        PIC X(10)     VALUE   SPACES.
+    77    02  FILLER        PIC X(06)     VALUE   "CODIGO".
+    78    02  FILLER        PIC X(15)     VALUE   SPACES.
+    79    02  FILLER        PIC X(04)     VALUE   "NOME".
+    80    02  FILLER        PIC X(23)     VALUE   SPACES.
+    81    02  FILLER        PIC X(14)     VALUE   "FATOR DE RISCO".
+    82    02  FILLER        PIC X(08)     VALUE   SPACES.
+    83
+    84 01  DETALHE.
+    85    02  FILLER        PIC X(10)     VALUE   SPACES.
+    86    02  COD-SAI       PIC 9(07).
+    87    02  FILLER        PIC X(06)     VALUE   SPACES.
+    88    02  NOME-SAI      PIC X(25).
+    89    02  FILLER        PIC X(12)     VALUE   SPACES.
+    90    02  FATOR-SAI     PIC X(10).
+    91    02  FILLER        PIC X(10)     VALUE   SPACES.
+    92
+    93 01  ROD.
+    94    02  FILLER        PIC X(05)     VALUE   SPACES.
+    95    02  FILLER        PIC X(22)     VALUE
+    96                         "TOTAL DE FUNCIONARIOS:".
+    97    02  FILLER        PIC X(05)     VALUE   SPACES.
+    98    02  T-FUNC        PIC ZZZ9.
+    99    02  FILLER        PIC X(44)     VALUE   SPACES.
+   100
+   101 PROCEDURE DIVISION.
+   102
+   103 PGM-EX05.
+   104
+   105 PERFORM INICIO.
+   106
+   107 PERFORM PRINCIPAL
+   108    UNTIL FIM-ARQ  EQUAL  "SIM".
+   109 PERFORM TERMINO.
+   110    STOP RUN.
+   111
+   112 INICIO.
+   113    OPEN INPUT   CADENT
+   114         OUTPUT  RELSAI.
+   115
+* Microsoft COBOL Version 4.5        L2.4 revision 002 16-Mar-21 21:16 Page   3
+*                                       EX02.CBL
+   116    PERFORM LEITURA.
+   117
+   118 LEITURA.
+   119    READ  CADENT
+   120       AT END
+   121       MOVE  "SIM"  TO   FIM-ARQ.
+   122
+   123 PRINCIPAL.
+   124
+   125 PERFORM  IMPRESSAO.
+   126 PERFORM  LEITURA.
+   127
+   128 IMPRESSAO.
+   129    IF  CT-LIN  GREATER THAN  19
+   130       PERFORM  CABECALHO.
+   131    PERFORM  IMPDET.
+   132
+   133 IMPDET.
+   134    IF GRUPO-RISCO  EQUAL TO   "S"
+   135       MOVE  COD-ENT     TO  COD-SAI
+   136       MOVE  NOME-ENT    TO  NOME-SAI
+   137       MOVE  FATOR-ENT   TO  FATOR-SAI
+   138
+   139       WRITE  REG-ATR  FROM  DETALHE
+   140          AFTER  ADVANCING  1  LINE
+   141       ADD  1   TO  TOTAL-FUNC
+*  34-S*****************************                                   (   0)**
+**    Operand  should be numeric
+   142       ADD  1   TO  CT-LIN.
+   143
+   144 CABECALHO.
+   145    MOVE  SPACES   TO  REG-ATR.
+   146    ADD   1        TO  CT-PAG.
+   147    MOVE  CT-PAG   TO  VAR-PAG.
+   148
+   149    WRITE  REG-ATR
+   150       AFTER  ADVANCING  PAGE.
+   151    WRITE  REG-ATR  FROM  CAB-01
+   152       AFTER  ADVANCING  1  LINE.
+   153    WRITE  REG-ATR  FROM  CAB-02
+   154       AFTER  ADVANCING  1  LINES.
+   155    WRITE  REG-ATR  FROM  CAB-03
+   156       AFTER  ADVANCING  1  LINES.
+   157    WRITE  REG-ATR  FROM  CAB-04
+   158       AFTER  ADVANCING  2  LINES.
+   159
+   160    MOVE  ZEROS  TO CT-LIN.
+   161
+   162 RESULTADO.
+   163    MOVE  TOTAL-FUNC   TO  T-FUNC.
+   164    WRITE  REG-ATR
+   165       AFTER  ADVANCING  2  LINES.
+   166
+   167 TERMINO.
+   168    PERFORM  RESULTADO.
+   169    CLOSE   CADENT
+   170            RELSAI.
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* Microsoft COBOL Version 4.5        L2.4 revision 002 16-Mar-21 21:16 Page   4
+*                                       EX02.CBL
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Last message on page:  3
+*
+* Total Messages:     1
+* Unrecoverable :     0                    Severe  :     1
+* Errors        :     0                    Warnings:     0
+* Informational :     0                    Flags   :     0
+* Data:        1612     Code:         640     Dictionary:        1821

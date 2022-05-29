@@ -1,0 +1,204 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Apr-21 22:08 Page   1
+*                                       EX04.CBL
+* Options: LIST(EX04.LST) ASMLIST(EX04.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.      EX05.
+     3 AUTHOR.          GABRIEL FRANKLIN
+     4                          REBECCA M M MURAD
+     5                  WILLIAN KOHATSU.
+     6 INSTALLATION.    HOME.
+     7 DATE-WRITTEN.    09-04-2021.
+     8 DATE-COMPILED. 22-Apr-21 22:08.
+     9 SECURITY.        APENAS O AUTOR.
+    10*REMARKS.     LER UM ARQUIVO E IMPRIMIR UM RELATORIO.
+    11
+    12 ENVIRONMENT DIVISION.
+    13 CONFIGURATION SECTION.
+    14    SOURCE-COMPUTER.   DELL-PC.
+    15    OBJECT-COMPUTER.   DELL-PC.
+    16    SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    17
+    18 INPUT-OUTPUT SECTION.
+    19 FILE-CONTROL.
+    20
+    21    SELECT  CADPROD  ASSIGN TO DISK
+    22    ORGANIZATION  IS  LINE SEQUENTIAL.
+    23
+    24    SELECT  RELPROD  ASSIGN TO DISK.
+    25
+    26 DATA DIVISION.
+    27 FILE SECTION.
+    28
+    29 FD CADPROD
+    30    LABEL  RECORD  ARE  STANDARD
+    31    VALUE  OF FILE-ID  IS  "CADPROD.DAT".
+    32
+    33 01  REG-PROD.
+    34    02 COD-PRODUTO            PIC 9(07).
+    35    02 NOME-PRODUTO           PIC X(20).
+    36    02 PRECO-PRODUTO          PIC 9(05)V99.
+    37
+    38 FD RELPROD
+    39    LABEL  RECORD  IS  OMITTED.
+    40
+    41 01  REG-ATR        PIC X(80).
+    42
+    43 WORKING-STORAGE SECTION.
+    44
+    45 77  FIM-ARQ        PIC X(03)     VALUE   "NAO".
+    46 77  CT-LIN         PIC 9(002)    VALUE   21.
+    47 77  CT-PAG         PIC 9(002)    VALUE   ZEROS.
+    48 77  SOMA-PROD      PIC 9(08)V99  VALUE   ZEROS.
+    49 77  QUANTIDADE     PIC 9(10)     VALUE   ZEROS.
+    50 77  MEDIA          PIC 9(05)V99  VALUE   ZEROS.
+    51 77  MAIOR          PIC 9(05)V99  VALUE   ZEROS.
+    52 77  MENOR          PIC 9(05)V99  VALUE   99999.
+    53
+    54 01  CAB-01.
+    55    02  FILLER      PIC X(20)     VALUE   SPACES.
+    56    02  FILLER      PIC X(22)     VALUE
+    57       "SUPERMERCADO COMPREBEM".
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Apr-21 22:08 Page   2
+*                                       EX04.CBL
+    58    02  FILLER      PIC X(23)     VALUE   SPACES.
+    59    02  FILLER      PIC X(05)     VALUE   "PAG.".
+    60    02  VAR-PAG     PIC ZZ9.
+    61    02  FILLER      PIC X(07)     VALUE   SPACES.
+    62
+    63 01  CAB-02.
+    64    02  FILLER      PIC X(09)     VALUE   SPACES.
+    65    02  FILLER      PIC X(06)     VALUE   "CODIGO".
+    66    02  FILLER      PIC X(22)     VALUE   SPACES.
+    67    02  FILLER      PIC X(04)     VALUE   "NOME".
+    68    02  FILLER      PIC X(22)     VALUE   SPACES.
+    69    02  FILLER      PIC X(05)     VALUE   "PRECO".
+    70    02  FILLER      PIC X(12)     VALUE   SPACES.
+    71
+    72 01  CAB-03.
+    73    02  FILLER      PIC X(80)     VALUE   SPACES.
+    74
+    75 01  DETALHE.
+    76    02  FILLER      PIC X(09)     VALUE   SPACES.
+    77    02  CODIGO      PIC 9(07).
+    78    02  FILLER      PIC X(12)     VALUE   SPACES.
+    79    02  NOME        PIC X(20).
+    80    02  FILLER      PIC X(16)     VALUE   SPACES.
+    81    02  PRECO       PIC ZZZZ9,99.
+    82    02  FILLER      PIC X(09)     VALUE   SPACES.
+    83
+    84 01  RD-1.
+    85    02  FILLER       PIC X(09)    VALUE   SPACES.
+    86    02  FILLER       PIC X(31)    VALUE
+    87       "MEDIA DOS PRECOS DOS PRODUTOS: ".
+    88    02  MEDIA-PROD   PIC ZZZZ9,99 VALUE   ZEROS.
+    89    02  FILLER       PIC X(33)    VALUE   SPACES.
+    90
+    91 01  RD-2.
+    92    02  FILLER      PIC X(09)     VALUE   SPACES.
+    93    02  FILLER      PIC X(18)     VALUE
+    94       "PRECO MAIS BAIXO: ".
+    95    02  MENOR-P     PIC ZZZZ9,99  VALUE   ZEROS.
+    96    02  FILLER      PIC X(46)     VALUE   SPACES.
+    97
+    98 01  RD-3.
+    99    02  FILLER      PIC X(09)     VALUE   SPACES.
+   100    02  FILLER      PIC X(17)     VALUE
+   101       "PRECO MAIS ALTO: ".
+   102    02  MAIOR-P     PIC ZZZZ9,99  VALUE   ZEROS.
+   103    02  FILLER      PIC X(47)     VALUE   SPACES.
+   104
+   105 PROCEDURE DIVISION.
+   106
+   107 PGM-EX04.
+   108
+   109 PERFORM INICIO.
+   110
+   111 PERFORM PRINCIPAL
+   112    UNTIL FIM-ARQ  EQUAL  "SIM".
+   113 PERFORM CALC-MEDIA.
+   114 PERFORM TERMINO.
+   115    STOP RUN.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Apr-21 22:08 Page   3
+*                                       EX04.CBL
+   116
+   117 INICIO.
+   118    OPEN INPUT   CADPROD
+   119         OUTPUT  RELPROD.
+   120
+   121    PERFORM LEITURA.
+   122
+   123 LEITURA.
+   124    READ  CADPROD
+   125       AT END
+   126       MOVE  "SIM"  TO   FIM-ARQ.
+   127
+   128 PRINCIPAL.
+   129
+   130 PERFORM  SOMA-PRODUTO.
+   131 PERFORM  IMPRESSAO.
+   132 PERFORM  LEITURA.
+   133
+   134 SOMA-PRODUTO.
+   135    ADD  PRECO-PRODUTO
+   136       TO  SOMA-PROD.
+   137    ADD  1  TO  QUANTIDADE.
+   138
+   139 CALC-MEDIA.
+   140    DIVIDE  SOMA-PROD  BY  QUANTIDADE
+   141       GIVING  MEDIA.
+   142
+   143 IMPRESSAO.
+   144    IF  CT-LIN  GREATER THAN  19
+   145       PERFORM  CABECALHO.
+   146    PERFORM  IMPDET.
+   147
+   148 IMPDET.
+   149    IF  PRECO-PRODUTO  LESS THAN  MENOR
+   150       MOVE  PRECO-PRODUTO   TO   MENOR.
+   151    IF  PRECO-PRODUTO  GREATER THAN  MAIOR
+   152       MOVE  PRECO-PRODUTO   TO   MAIOR.
+   153
+   154    MOVE  COD-PRODUTO      TO  CODIGO.
+   155    MOVE  NOME-PRODUTO     TO  NOME.
+   156    MOVE  PRECO-PRODUTO    TO  PRECO.
+   157
+   158    WRITE  REG-ATR  FROM  DETALHE
+   159       AFTER  ADVANCING  1  LINES.
+   160    ADD  1   TO  CT-LIN.
+   161
+   162 CABECALHO.
+   163    MOVE  SPACES   TO  REG-ATR.
+   164    ADD   1        TO  CT-PAG.
+   165    MOVE  CT-PAG   TO  VAR-PAG.
+   166
+   167    WRITE  REG-ATR
+   168       AFTER  ADVANCING  PAGE.
+   169    WRITE  REG-ATR  FROM  CAB-01
+   170       AFTER  ADVANCING  2  LINES.
+   171    WRITE  REG-ATR  FROM  CAB-02
+   172       AFTER  ADVANCING  4  LINES.
+   173    WRITE  REG-ATR  FROM  CAB-03
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Apr-21 22:08 Page   4
+*                                       EX04.CBL
+   174       AFTER  ADVANCING  1  LINE.
+   175
+   176    MOVE  ZEROS  TO CT-LIN.
+   177
+   178 TERMINO.
+   179            MOVE  MEDIA     TO    MEDIA-PROD.
+   180    WRITE  REG-ATR  FROM  RD-1
+   181       AFTER ADVANCING  2  LINES.
+   182    MOVE  MENOR     TO   MENOR-P.
+   183    WRITE  REG-ATR  FROM  RD-2
+   184        AFTER ADVANCING  1  LINE.
+   185    MOVE  MAIOR     TO   MAIOR-P.
+   186    WRITE  REG-ATR  FROM  RD-3
+   187        AFTER ADVANCING  1  LINE.
+   188    CLOSE   CADPROD
+   189            RELPROD.
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1744     Code:         760     Dictionary:        2131

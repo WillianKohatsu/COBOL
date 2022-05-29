@@ -1,0 +1,126 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 02-Mar-21 21:29 Page   1
+*                                       EX08.CBL
+* Options: LIST(EX08.LST) ASMLIST(EX08.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.      EX01.
+     3 AUTHOR.          REBECCA M M MURAD
+     4                  WILLIAN KOHATSU.
+     5 INSTALLATION.    HOME.
+     6 DATE-WRITTEN.    02-03-2021.
+     7 DATE-COMPILED. 02-Mar-21 21:29.
+     8 SECURITY.        APENAS O AUTOR.
+     9*REMARKS.     LER TODOS OS REGISTROS DO ARQUIO DE ENTRADA CADFUN
+    10*             E GRAVAR O SALARIO REAJUSTADO NO ARQUIVO DE SAIDA CA
+    11
+    12 ENVIRONMENT DIVISION.
+    13 CONFIGURATION SECTION.
+    14    SOURCE-COMPUTER.   DELL-PC.
+    15    OBJECT-COMPUTER.   DELL-PC.
+    16    SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    17
+    18 INPUT-OUTPUT SECTION.
+    19 FILE-CONTROL.
+    20
+    21    SELECT  CADFUN  ASSIGN TO DISK
+    22    ORGANIZATION  IS  LINE SEQUENTIAL.
+    23
+    24    SELECT  CADSAI  ASSIGN TO DISK
+    25    ORGANIZATION  IS  LINE SEQUENTIAL.
+    26
+    27 DATA DIVISION.
+    28 FILE SECTION.
+    29
+    30 FD CADFUN
+    31    LABEL  RECORD  ARE  STANDARD
+    32    VALUE  OF FILE-ID  IS  "CADFUN.DAT".
+    33
+    34 01  REG-ENT.
+    35    02 COD-ENT      PIC 9(05).
+    36    02 NOME-ENT     PIC X(20).
+    37    02 SALARIO-BR   PIC 9(05)V99.
+    38
+    39 FD CADSAI
+    40    LABEL  RECORD  ARE STANDARD
+    41    VALUE  OF FILE-ID IS  "CADSAI.DAT".
+    42
+    43 01  REG-SAI.
+    44    03 COD-SAI       PIC 9(05).
+    45    03 NOME-SAI      PIC X(20).
+    46    03 SALARIO-REAJ  PIC 9(05)V9(02).
+    47
+    48 WORKING-STORAGE SECTION.
+    49
+    50 77  FIM-ARQ        PIC X(03)     VALUE   "NAO".
+    51 77  REAJ           PIC 9(03)     VALUE   ZEROS.
+    52 77  AUX            PIC 9(10)V99  VALUE   ZEROS.
+    53 77  SALARIO-NOVO   PIC 9(10)V99  VALUE   ZEROS.
+    54
+    55 PROCEDURE DIVISION.
+    56
+    57 PGM-EX08.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 02-Mar-21 21:29 Page   2
+*                                       EX08.CBL
+    58
+    59 PERFORM INICIO.
+    60
+    61 PERFORM PRINCIPAL
+    62    UNTIL FIM-ARQ  EQUAL  "SIM".
+    63 PERFORM TERMINO.
+    64    STOP RUN.
+    65
+    66 INICIO.
+    67    OPEN INPUT   CADFUN
+    68         OUTPUT  CADSAI.
+    69
+    70    PERFORM LEITURA.
+    71
+    72 LEITURA.
+    73    READ  CADFUN
+    74       AT END
+    75       MOVE  "SIM"  TO   FIM-ARQ.
+    76
+    77 PRINCIPAL.
+    78
+    79 PERFORM  REAJUSTE.
+    80 PERFORM  GRAVACAO.
+    81 PERFORM  LEITURA.
+    82
+    83 REAJUSTE.
+    84
+    85    IF SALARIO-BR  NOT GREATER THAN 1000
+    86       MOVE  112   TO REAJ.
+    87
+    88    IF SALARIO-BR GREATER THAN 1000
+    89    AND SALARIO-BR  NOT GREATER THAN  2000
+    90       MOVE  111  TO REAJ.
+    91
+    92    IF SALARIO-BR  GREATER  THAN  2000
+    93          MOVE  110  TO REAJ.
+    94     PERFORM REAJ-SALARIO.
+    95
+    96 REAJ-SALARIO.
+    97    MULTIPLY  SALARIO-BR  BY  REAJ
+    98           GIVING  AUX.
+    99    DIVIDE  AUX  BY 100
+   100           GIVING SALARIO-NOVO.
+   101
+   102 GRAVACAO.
+   103    MOVE  COD-ENT  TO  COD-SAI.
+   104    MOVE  NOME-ENT  TO NOME-SAI.
+   105    MOVE  SALARIO-NOVO  TO  SALARIO-REAJ.
+   106    WRITE REG-SAI.
+   107
+   108 TERMINO.
+   109    CLOSE   CADFUN
+   110            CADSAI.
+   111
+   112
+   113
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+* Microsoft COBOL Version 4.5        L2.4 revision 002 02-Mar-21 21:29 Page   3
+*                                       EX08.CBL
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1072     Code:         427     Dictionary:        1305

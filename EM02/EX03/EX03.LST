@@ -1,0 +1,239 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Apr-21 18:31 Page   1
+*                                       EX03.CBL
+* Options: LIST(EX03.LST) ASMLIST(EX03.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.      EX05.
+     3 AUTHOR.          GABRIEL FRANKLIN
+     4                          REBECCA M M MURAD
+     5                  WILLIAN KOHATSU.
+     6 INSTALLATION.    HOME.
+     7 DATE-WRITTEN.    09-03-2021.
+     8 DATE-COMPILED. 22-Apr-21 18:31.
+     9 SECURITY.        APENAS O AUTOR.
+    10*REMARKS.     LER UM ARQUIVO E IMPRIMIR UM RELATORIO.
+    11
+    12 ENVIRONMENT DIVISION.
+    13 CONFIGURATION SECTION.
+    14    SOURCE-COMPUTER.   DELL-PC.
+    15    OBJECT-COMPUTER.   DELL-PC.
+    16    SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    17
+    18 INPUT-OUTPUT SECTION.
+    19 FILE-CONTROL.
+    20
+    21    SELECT  CADALU  ASSIGN TO DISK
+    22    ORGANIZATION  IS  LINE SEQUENTIAL.
+    23
+    24    SELECT  CADREP  ASSIGN TO DISK
+    25    ORGANIZATION  IS  LINE SEQUENTIAL.
+    26
+    27    SELECT  RELAPROV  ASSIGN TO DISK.
+    28
+    29 DATA DIVISION.
+    30 FILE SECTION.
+    31
+    32 FD CADALU
+    33    LABEL  RECORD  ARE  STANDARD
+    34    VALUE  OF FILE-ID  IS  "CADALU.DAT".
+    35
+    36 01  REG-ALU.
+    37    02 MATRICULA-ALU          PIC 9(07).
+    38    02 NOME-ALU               PIC X(20).
+    39    02 NOTA1-ALU              PIC 9(02)V99.
+    40    02 NOTA2-ALU              PIC 9(02)V99.
+    41    02 FALTAS                 PIC 9(02).
+    42
+    43 FD CADREP
+    44    LABEL  RECORD  ARE  STANDARD
+    45    VALUE  OF FILE-ID  IS  "CADREP.DAT".
+    46
+    47 01  REG-REP.
+    48    02 MATRICULA-REP          PIC 9(07).
+    49    02 NOME-REP               PIC X(20).
+    50    02 MEDIA-REP              PIC 9(02)V99.
+    51    02 CONCEITO-REP           PIC X(01).
+    52
+    53 FD RELAPROV
+    54    LABEL  RECORD  IS  OMITTED.
+    55
+    56 01  REG-ATR        PIC X(80).
+    57
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Apr-21 18:31 Page   2
+*                                       EX03.CBL
+    58 WORKING-STORAGE SECTION.
+    59
+    60 77  FIM-ARQ        PIC X(03)     VALUE   "NAO".
+    61 77  CT-LIN         PIC 9(002)    VALUE   21.
+    62 77  CT-PAG         PIC 9(002)    VALUE   ZEROS.
+    63 77  SOMA-NOTA      PIC 9(03)V99  VALUE   ZEROS.
+    64 77  MEDIA          PIC 9(02)V99  VALUE   ZEROS.
+    65 77  CONCEITO       PIC X(01).
+    66 77  TOTAL-E        PIC 9(03)     VALUE   ZEROS.
+    67 77  TOTAL-A        PIC 9(03)     VALUE   ZEROS.
+    68 77  TOTAL-B        PIC 9(03)     VALUE   ZEROS.
+    69
+    70 01  CAB-01.
+    71    02  FILLER      PIC X(10)     VALUE   SPACES.
+    72    02  FILLER      PIC X(24)     VALUE
+    73       "FACULDADE DE TECNOLOGIA ".
+    74    02  FILLER      PIC X(12)     VALUE
+    75       "DE SAO PAULO".
+    76    02  FILLER      PIC X(21)     VALUE   SPACES.
+    77    02  FILLER      PIC X(05)     VALUE   "PAG.".
+    78    02  VAR-PAG     PIC ZZ9.
+    79    02  FILLER      PIC X(07)     VALUE   SPACES.
+    80
+    81 01  CAB-02.
+    82    02  FILLER      PIC X(08)     VALUE   SPACES.
+    83    02  FILLER      PIC X(09)     VALUE   "MATRICULA".
+    84    02  FILLER      PIC X(21)     VALUE   SPACES.
+    85    02  FILLER      PIC X(04)     VALUE   "NOME".
+    86    02  FILLER      PIC X(22)     VALUE   SPACES.
+    87    02  FILLER      PIC X(08)     VALUE   "CONCEITO".
+    88    02  FILLER      PIC X(08)     VALUE   SPACES.
+    89
+    90 01  DETALHE.
+    91    02  FILLER      PIC X(09)     VALUE   SPACES.
+    92    02  MAT-REG     PIC 9(07).
+    93    02  FILLER      PIC X(15)     VALUE   SPACES.
+    94    02  NOME-REG    PIC X(20).
+    95    02  FILLER      PIC X(16)     VALUE   SPACES.
+    96    02  CON-REG     PIC X(01).
+    97    02  FILLER      PIC X(12)     VALUE   SPACES.
+    98
+    99 01  RD-1.
+   100    02  FILLER       PIC X(17)     VALUE
+   101       "NUMERO DE ALUNOS ".
+   102    02  FILLER       PIC X(16)     VALUE
+   103       "COM CONCEITO E: ".
+   104    02  CON-E        PIC ZZ9       VALUE  ZEROS.
+   105    02  FILLER       PIC X(44)     VALUE  SPACES.
+   106
+   107 01  RD-2.
+   108    02  FILLER      PIC X(33)     VALUE
+   109       "NUMERO DE ALUNOS COM CONCEITO A: ".
+   110    02  CON-A       PIC ZZ9       VALUE  ZEROS.
+   111    02  FILLER      PIC X(44)     VALUE  SPACES.
+   112
+   113 01  RD-3.
+   114    02  FILLER      PIC X(33)     VALUE
+   115       "NUMERO DE ALUNOS COM CONCEITO B: ".
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Apr-21 18:31 Page   3
+*                                       EX03.CBL
+   116    02  CON-B       PIC ZZ9       VALUE  ZEROS.
+   117    02  FILLER      PIC X(44)     VALUE  SPACES.
+   118
+   119 PROCEDURE DIVISION.
+   120
+   121 PGM-EX03.
+   122
+   123 PERFORM INICIO.
+   124
+   125 PERFORM PRINCIPAL
+   126    UNTIL FIM-ARQ  EQUAL  "SIM".
+   127 PERFORM TERMINO.
+   128    STOP RUN.
+   129
+   130 INICIO.
+   131    OPEN INPUT   CADALU
+   132         OUTPUT  CADREP
+   133                 RELAPROV.
+   134
+   135    PERFORM LEITURA.
+   136
+   137 LEITURA.
+   138    READ  CADALU
+   139       AT END
+   140       MOVE  "SIM"  TO   FIM-ARQ.
+   141
+   142 PRINCIPAL.
+   143
+   144 PERFORM  MEDIA-ALUNO.
+   145 PERFORM  IMPRESSAO.
+   146 PERFORM  LEITURA.
+   147
+   148 MEDIA-ALUNO.
+   149    ADD  NOTA1-ALU
+   150         NOTA2-ALU
+   151       GIVING  SOMA-NOTA.
+   152    DIVIDE  SOMA-NOTA  BY  2
+   153       GIVING  MEDIA.
+   154
+   155 IMPRESSAO.
+   156    IF  CT-LIN  GREATER THAN  19
+   157       PERFORM  CABECALHO.
+   158    PERFORM  VERIFICACAO.
+   159
+   160 VERIFICACAO.
+   161    IF  FALTAS  GREATER  THAN  15  OR
+   162        MEDIA   LESS     THAN  6
+   163       PERFORM  IMPCAD-REP
+   164    ELSE
+   165       PERFORM  IMPDET.
+   166
+   167 IMPCAD-REP.
+   168    IF  FALTAS GREATER  THAN  15
+   169       MOVE "F"   TO   CONCEITO
+   170    ELSE
+   171       MOVE "C"   TO   CONCEITO.
+   172
+   173    MOVE  MATRICULA-ALU   TO   MATRICULA-REP.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 22-Apr-21 18:31 Page   4
+*                                       EX03.CBL
+   174    MOVE  NOME-ALU        TO   NOME-REP.
+   175    MOVE  MEDIA           TO   MEDIA-REP.
+   176    MOVE  CONCEITO        TO   CONCEITO-REP.
+   177    WRITE  REG-REP.
+   178
+   179 IMPDET.
+   180    IF  MEDIA  NOT GREATER THAN  8
+   181       MOVE  "B"  TO  CONCEITO
+   182       ADD  1  TO  TOTAL-B
+   183    ELSE IF  MEDIA  NOT GREATER THAN  9
+   184       MOVE  "A"   TO CONCEITO
+   185       ADD  1  TO  TOTAL-A
+   186    ELSE
+   187       MOVE  "E"  TO  CONCEITO
+   188       ADD 1  TO TOTAL-E.
+   189
+   190    MOVE  MATRICULA-ALU   TO  MAT-REG.
+   191    MOVE  NOME-ALU        TO  NOME-REG.
+   192    MOVE  CONCEITO        TO  CON-REG.
+   193
+   194    WRITE  REG-ATR  FROM  DETALHE
+   195       AFTER  ADVANCING  1  LINES.
+   196    ADD  1   TO  CT-LIN.
+   197
+   198 CABECALHO.
+   199    MOVE  SPACES   TO  REG-ATR.
+   200    ADD   1        TO  CT-PAG.
+   201    MOVE  CT-PAG   TO  VAR-PAG.
+   202
+   203    WRITE  REG-ATR
+   204       AFTER  ADVANCING  PAGE.
+   205    WRITE  REG-ATR  FROM  CAB-01
+   206       AFTER  ADVANCING  2  LINES.
+   207    WRITE  REG-ATR  FROM  CAB-02
+   208       AFTER  ADVANCING  3  LINES.
+   209
+   210    MOVE  ZEROS  TO CT-LIN.
+   211
+   212 TERMINO.
+   213    MOVE  TOTAL-E   TO   CON-E.
+   214    WRITE  REG-ATR  FROM  RD-1
+   215       AFTER ADVANCING  2  LINES.
+   216    MOVE  TOTAL-A   TO   CON-A.
+   217    WRITE  REG-ATR  FROM  RD-2
+   218        AFTER ADVANCING  1  LINE.
+   219    MOVE  TOTAL-B   TO   CON-B.
+   220    WRITE  REG-ATR  FROM  RD-3
+   221        AFTER ADVANCING  1  LINE.
+   222    CLOSE   CADALU
+   223            CADREP
+   224            RELAPROV.
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1852     Code:         876     Dictionary:        2563

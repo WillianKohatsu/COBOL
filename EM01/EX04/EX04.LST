@@ -1,0 +1,110 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 23-Feb-21 19:58 Page   1
+*                                       EX04.CBL
+* Options: LIST(EX04.LST) ASMLIST(EX04.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.     EX04.
+     3 AUTHOR.         WILLIAN KOHATSU.
+     4 INSTALLATION.   HOME.
+     5 DATE-WRITTEN.   23-02-2021.
+     6 DATE-COMPILED. 23-Feb-21 19:58.
+     7 SECURITY.       APENAS O AUTOR PODE MODIFICAR.
+     8*REMARKS.        LER TODOS OS REGISTROS DE CADCLI1 E
+     9*                GRAVAR SOMENTE O SEXO EM CADCLI2.
+    10
+    11 ENVIRONMENT DIVISION.
+    12 CONFIGURATION SECTION.
+    13
+    14    SOURCE-COMPUTER.   DELL-PC.
+    15    OBJECT-COMPUTER.   DELL-PC.
+    16    SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    17
+    18 INPUT-OUTPUT SECTION.
+    19 FILE-CONTROL.
+    20
+    21    SELECT  CADCLI1  ASSIGN TO DISK
+    22    ORGANIZATION  IS  LINE SEQUENTIAL.
+    23
+    24    SELECT  CADCLI2  ASSIGN TO DISK
+    25    ORGANIZATION  IS  LINE SEQUENTIAL.
+    26
+    27 DATA DIVISION.
+    28 FILE SECTION.
+    29
+    30    FD CADCLI1
+    31       LABEL RECORD ARE STANDARD
+    32       VALUE OF FILE-ID IS "CADCLI1.DAT".
+    33
+    34    01 REG-ENT.
+    35       02 COD-ENT       PIC 9(05).
+    36       02 NOME-ENT      PIC X(20).
+    37       02 SEXO-ENT      PIC X(01).
+    38
+    39    FD CADCLI2
+    40       LABEL RECORD ARE STANDARD
+    41       VALUE OF FILE-ID IS "CADCLI2.DAT".
+    42
+    43    01 REG-SAI.
+    44       02 SEXO-SAI      PIC X(01).
+    45
+    46 WORKING-STORAGE SECTION.
+    47
+    48 77 FIM-ARQ            PIC X(03)    VALUE "NAO".
+    49
+    50 PROCEDURE DIVISION.
+    51
+    52 PGM-EXE04.
+    53
+    54    PERFORM INICIO.
+    55
+    56    PERFORM PRINCIPAL
+    57       UNTIL  FIM-ARQ  EQUAL  "SIM".
+* Microsoft COBOL Version 4.5        L2.4 revision 002 23-Feb-21 19:58 Page   2
+*                                       EX04.CBL
+    58    PERFORM TERMINO.
+    59       STOP RUN.
+    60
+    61 INICIO.
+    62    OPEM INPUT  CADCLI1
+* 641-S*************                                                   (   0)**
+**    '.' missing following procedure name declaration, or unrecognized verb
+    63         OUTPUT CADCLI2.
+    64
+    65    PERFORM LEITURA.
+    66
+    67 LEITURA.
+    68    READ  CADCLI1  AT END
+    69    MOVE  "SIM"  TO  FIM-ARQ.
+    70
+    71 PRINCIPAL.
+    72    PERFORM  GRAVACAO.
+    73    PERFORM  LEITURA.
+    74
+    75 GRAVACAO.
+    76    MOVE  SEXO-ENT  TO  SEXO-SAI.
+    77    WRITE  REG-SAI.
+    78 TERMINO.
+    79    COLSE  CADCLI1
+* 641-S*****************                                               (   2)**
+**    '.' missing following procedure name declaration, or unrecognized verb
+    80           CADCLI2.
+    81
+    82
+    83
+    84
+    85
+    86
+    87
+    88
+    89
+    90
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Last message on page:  2
+*
+* Total Messages:     2
+* Unrecoverable :     0                    Severe  :     2
+* Errors        :     0                    Warnings:     0
+* Informational :     0                    Flags   :     0
+* Data:         992     Code:         220     Dictionary:        1012

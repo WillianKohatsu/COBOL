@@ -1,0 +1,86 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 02-Mar-21 21:22 Page   1
+*                                     EM01EX06.CBL
+* Options: LIST(EM01EX06.LST) ASMLIST(EM01EX06.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.       EX05.
+     3 AUTHOR.           REBECCA MURAD WILLIAN KOHATSU.
+     4 INSTALLATION.     FATEC-SP.
+     5 DATE-WRITTEN.     23/02/2021.
+     6 DATE-COMPILED. 02-Mar-21 21:22.
+     7 SECURITY. APENAS O AUTOR PODE MODIFICA-LO.
+     8
+     9 ENVIRONMENT DIVISION.
+    10 CONFIGURATION SECTION.
+    11 SOURCE-COMPUTER.  LATITUDE-PC.
+    12 OBJECT-COMPUTER.  LATITUDE-PC.
+    13 SPECIAL-NAMES.    DECIMAL-POINT IS COMMA.
+    14
+    15 INPUT-OUTPUT SECTION.
+    16 FILE-CONTROL.
+    17     SELECT CADENT ASSIGN TO DISK
+    18     ORGANIZATION IS LINE SEQUENTIAL.
+    19     SELECT CADSAI ASSIGN TO DISK
+    20     ORGANIZATION IS LINE SEQUENTIAL.
+    21
+    22
+    23 DATA DIVISION.
+    24 FILE SECTION.
+    25 FD CADENT
+    26    LABEL RECORD ARE STANDARD
+    27    VALUE OF FILE-ID IS "CADENT.DAT".
+    28 01 REG-ENT.
+    29     02 MATRICULA-ENT      PIC 9(05).
+    30     02 NOME-ENT           PIC X(20).
+    31     02 SALARIO-BRUTO      PIC 9(5)V99.
+    32 FD CADSAI
+    33    LABEL RECORD ARE STANDARD
+    34    VALUE OF FILE-ID IS "CADSAI.DAT".
+    35 01 REG-SAI.
+    36     02 MATRICULA-SAI      PIC 9(05).
+    37     02 NOME-SAI           PIC X(20).
+    38     02 SALARIO-BRUTO-SAI  PIC 9(5)V99.
+    39
+    40 WORKING-STORAGE SECTION.
+    41 77 FIM-ARQ   PIC X(03)       VALUE "NAO".
+    42
+    43 PROCEDURE DIVISION.
+    44
+    45 MAIN.
+    46     PERFORM INICIO.
+    47     PERFORM PRINCIPAL
+    48             UNTIL  FIM-ARQ  EQUAL  "SIM".
+    49     PERFORM TERMINO.
+    50     STOP RUN.
+    51
+    52 INICIO.
+    53     OPEN INPUT  CADENT
+    54          OUTPUT CADSAI.
+    55     PERFORM LEITURA.
+    56
+    57 LEITURA.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 02-Mar-21 21:22 Page   2
+*                                     EM01EX06.CBL
+    58     READ CADENT
+    59          AT END
+    60          MOVE "SIM" TO FIM-ARQ.
+    61
+    62 PRINCIPAL.
+    63     IF SALARIO-BRUTO > 3000 THEN
+    64        PERFORM GRAVACAO.
+    65     PERFORM LEITURA.
+    66
+    67 GRAVACAO.
+    68     MOVE MATRICULA-ENT TO MATRICULA-SAI.
+    69     MOVE NOME-ENT      TO NOME-SAI.
+    70     MOVE SALARIO-BRUTO TO SALARIO-BRUTO-SAI.
+    71     WRITE REG-SAI.
+    72
+    73 TERMINO.
+    74     CLOSE CADENT
+    75           CADSAI.
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1032     Code:         334     Dictionary:        1094

@@ -1,0 +1,282 @@
+* Microsoft COBOL Version 4.5        L2.4 revision 002 26-Apr-21 01:53 Page   1
+*                                       EX05.CBL
+* Options: LIST(EX05.LST) ASMLIST(EX05.GRP)
+     1 IDENTIFICATION DIVISION.
+     2 PROGRAM-ID.      EX05.
+     3 AUTHOR.          GABRIEL FRANKLIN
+     4                  REBECCA M M MURAD
+     5                  WILLIAN KOHATSU.
+     6 INSTALLATION.    HOME.
+     7 DATE-WRITTEN.    23-03-2021.
+     8 DATE-COMPILED. 26-Apr-21 01:53.
+     9 SECURITY.        APENAS O AUTOR.
+    10*REMARKS.         LER ARQUIVO REGENT E GERAR REGOK E RELOCOR.
+    11
+    12 ENVIRONMENT DIVISION.
+    13 CONFIGURATION SECTION.
+    14    SOURCE-COMPUTER.   DELL-PC.
+    15    OBJECT-COMPUTER.   DELL-PC.
+    16    SPECIAL-NAMES.     DECIMAL-POINT IS COMMA.
+    17
+    18 INPUT-OUTPUT SECTION.
+    19 FILE-CONTROL.
+    20
+    21    SELECT  REGENT  ASSIGN TO DISK
+    22    ORGANIZATION  IS  LINE SEQUENTIAL.
+    23
+    24    SELECT  CADOK   ASSIGN TO DISK
+    25    ORGANIZATION  IS  LINE SEQUENTIAL.
+    26
+    27    SELECT  RELOCOR  ASSIGN TO DISK.
+    28
+    29 DATA DIVISION.
+    30 FILE SECTION.
+    31
+    32 FD REGENT
+    33    LABEL  RECORD  ARE  STANDARD
+    34    VALUE  OF FILE-ID  IS  "CADEMP.DAT".
+    35
+    36 01  REG-ENT.
+    37    02 COD-ENT                PIC 9(05).
+    38    02 RG-ENT                 PIC X(10).
+    39       88 RG-INVALIDO VALUE SPACES.
+    40    02 NOME-ENT               PIC X(30).
+    41       88 NOME-INVALIDO VALUE SPACES.
+    42    02 ESTADO-ENT             PIC X(02).
+    43       88 ESTADO-VALIDO VALUE "AC" "AL" "AP" "AM" "BA"
+    44          "CE" "DF" "ES" "GO" "MA" "MT" "MS" "MG"
+    45          "PA" "PB" "PR" "PE" "PI" "RJ" "RN" "RS"
+    46          "RO" "RR" "SC" "SP" "SE" "TO".
+    47    02 CIDADE-ENT             PIC X(30).
+    48       88 CIDADE-INVALIDA VALUE SPACES.
+    49    02 EMAIL-ENT              PIC X(30).
+    50       88 EMAIL-INVALIDO VALUE SPACES.
+    51
+    52 FD CADOK
+    53    LABEL  RECORD  ARE  STANDARD
+    54    VALUE  OF FILE-ID  IS  "CADOK.DAT".
+    55
+    56 01  REG-SAI.
+    57    02 RG-SAI                 PIC X(10).
+* Microsoft COBOL Version 4.5        L2.4 revision 002 26-Apr-21 01:53 Page   2
+*                                       EX05.CBL
+    58    02 NOME-SAI               PIC X(30).
+    59    02 ESTADO-SAI             PIC X(02).
+    60    02 CIDADE-SAI             PIC X(30).
+    61    02 EMAIL-SAI              PIC X(30).
+    62
+    63 FD RELOCOR
+    64    LABEL  RECORD  IS  OMITTED.
+    65
+    66 01  REG-ATR        PIC X(80).
+    67
+    68 WORKING-STORAGE SECTION.
+    69
+    70 77  FIM-ARQ        PIC X(03)     VALUE   "NAO".
+    71 77  CT-LIN         PIC 9(002)    VALUE   41.
+    72 77  CT-PAG         PIC 9(002)    VALUE   ZEROS.
+    73     77  CODE-CONTROL   PIC 9(05)     VALUE   ZEROS.
+    74
+    75 01  CAB-01.
+    76    02  FILLER      PIC X(10)      VALUE   SPACES.
+    77    02  FILLER      PIC X(33)     VALUE
+    78                    "RELATORIO DE DADOS INCONSISTENTES".
+    79    02  FILLER      PIC X(27)     VALUE   SPACES.
+    80    02  FILLER      PIC X(05)     VALUE   "PAG.".
+    81    02  VAR-PAG     PIC Z9.
+    82    02  FILLER      PIC X(03)     VALUE   SPACES.
+    83
+    84 01  CAB-02.
+    85    02  FILLER      PIC X(10)     VALUE   SPACES.
+    86    02  FILLER      PIC X(06)     VALUE   "CODIGO".
+    87    02  FILLER      PIC X(30)     VALUE   SPACES.
+    88    02  FILLER      PIC X(08)     VALUE   "MENSAGEM".
+    89    02  FILLER      PIC X(26)     VALUE   SPACES.
+    90
+    91 01  CAB-03.
+    92    02  FILLER        PIC X(40)     VALUE
+    93            "----------------------------------------".
+    94    02  FILLER        PIC X(40)     VALUE
+    95            "----------------------------------------".
+    96
+    97 01  DETALHE.
+    98    02  FILLER        PIC X(10)     VALUE   SPACES.
+    99    02  COD-REL       PIC ZZ999.
+   100    02  FILLER        PIC X(30)     VALUE   SPACES.
+   101    02  MENSAGEM      PIC X(25).
+   102    02  FILLER        PIC X(10)     VALUE   SPACES.
+   103
+   104 01 MENSAGEM1.
+   105    02  FILLER        PIC X(45)     VALUE   SPACES.
+   106    02  MSG           PIC X(25)     VALUE   SPACES.
+   107    02  FILLER        PIC X(10)     VALUE   SPACES.
+   108
+   109 PROCEDURE DIVISION.
+   110
+   111 PGM-EX05.
+   112
+   113 PERFORM INICIO.
+   114
+   115 PERFORM PRINCIPAL
+* Microsoft COBOL Version 4.5        L2.4 revision 002 26-Apr-21 01:53 Page   3
+*                                       EX05.CBL
+   116    UNTIL FIM-ARQ  EQUAL  "SIM".
+   117 PERFORM TERMINO.
+   118 STOP RUN.
+   119
+   120 INICIO.
+   121    OPEN INPUT   REGENT
+   122         OUTPUT  CADOK
+   123                 RELOCOR.
+   124
+   125    PERFORM LEITURA.
+   126
+   127 LEITURA.
+   128    READ  REGENT
+   129       AT END
+   130       MOVE  "SIM"  TO   FIM-ARQ.
+   131
+   132 PRINCIPAL.
+   133
+   134 PERFORM  IMPRESSAO.
+   135 PERFORM  LEITURA.
+   136
+   137 IMPRESSAO.
+   138    IF  CT-LIN  GREATER THAN  39
+   139       PERFORM  CABECALHO.
+   140    PERFORM  VERIFICA-RG.
+   141
+   142 VERIFICA-RG.
+   143    IF  RG-INVALIDO
+   144       MOVE  COD-ENT     TO  CODE-CONTROL
+   145       MOVE  COD-ENT     TO  COD-REL
+   146       MOVE  "RG NAO INFORMADO"   TO  MENSAGEM
+   147       ADD   1           TO  CT-LIN
+   148       WRITE  REG-ATR  FROM  DETALHE
+   149          AFTER  ADVANCING  2  LINES.
+   150     PERFORM  VERIFICA-NOME.
+   151
+   152 VERIFICA-NOME.
+   153    IF  NOME-INVALIDO
+   154       IF  CT-LIN  GREATER THAN  39
+   155          PERFORM  CABECALHO
+   156          PERFORM  VERIFICA-RG
+   157
+   158       ELSE IF  CODE-CONTROL  EQUAL TO   COD-ENT
+   159          MOVE  "NOME NAO INFORMADO"   TO  MSG
+   160          ADD   1           TO  CT-LIN
+   161          WRITE  REG-ATR  FROM  MENSAGEM1
+   162             AFTER  ADVANCING  1  LINE
+   163
+   164       ELSE
+   165          MOVE  COD-ENT     TO  CODE-CONTROL
+   166          MOVE  COD-ENT     TO  COD-REL
+   167          MOVE  "NOME NAO INFORMADO"   TO  MENSAGEM
+   168          ADD   2           TO  CT-LIN
+   169          WRITE  REG-ATR  FROM  DETALHE
+   170             AFTER  ADVANCING  2  LINE.
+   171    PERFORM  VERIFICA-ESTADO.
+   172
+   173 VERIFICA-ESTADO.
+* Microsoft COBOL Version 4.5        L2.4 revision 002 26-Apr-21 01:53 Page   4
+*                                       EX05.CBL
+   174    IF  NOT ESTADO-VALIDO
+   175       IF  CT-LIN  GREATER THAN  39
+   176          PERFORM  CABECALHO
+   177          PERFORM  VERIFICA-RG
+   178
+   179       ELSE IF  CODE-CONTROL  EQUAL TO   COD-ENT
+   180          MOVE  "ESTADO INVALIDO"   TO  MSG
+   181          ADD   1           TO  CT-LIN
+   182          WRITE  REG-ATR  FROM  MENSAGEM1
+   183             AFTER  ADVANCING  1  LINE
+   184
+   185       ELSE
+   186          MOVE  COD-ENT     TO  CODE-CONTROL
+   187          MOVE  COD-ENT     TO  COD-REL
+   188          MOVE  "ESTADO INVALIDO"   TO  MENSAGEM
+   189          ADD   2           TO  CT-LIN
+   190          WRITE  REG-ATR  FROM  DETALHE
+   191             AFTER  ADVANCING  2  LINE.
+   192    PERFORM  VERIFICA-CIDADE.
+   193
+   194 VERIFICA-CIDADE.
+   195    IF  CIDADE-INVALIDA
+   196       IF  CT-LIN  GREATER THAN  39
+   197          PERFORM  CABECALHO
+   198          PERFORM  VERIFICA-RG
+   199
+   200       ELSE IF  CODE-CONTROL  EQUAL TO   COD-ENT
+   201          MOVE  "CIDADE NAO INFORMADA"   TO  MSG
+   202          ADD   1           TO  CT-LIN
+   203          WRITE  REG-ATR  FROM  MENSAGEM1
+   204             AFTER  ADVANCING  1  LINE
+   205
+   206       ELSE
+   207          MOVE  COD-ENT     TO  CODE-CONTROL
+   208          MOVE  COD-ENT     TO  COD-REL
+   209          MOVE  "CIDADE NAO INFORMADA"   TO  MENSAGEM
+   210          ADD   2           TO  CT-LIN
+   211          WRITE  REG-ATR  FROM  DETALHE
+   212             AFTER  ADVANCING  2  LINE.
+   213    PERFORM  VERIFICA-EMAIL.
+   214
+   215 VERIFICA-EMAIL.
+   216    IF  EMAIL-INVALIDO
+   217       IF  CT-LIN  GREATER THAN  39
+   218          PERFORM  CABECALHO
+   219          PERFORM  VERIFICA-RG
+   220
+   221       ELSE IF  CODE-CONTROL  EQUAL TO   COD-ENT
+   222          MOVE  "EMAIL SEM DESCRICAO"   TO  MSG
+   223          ADD   1           TO  CT-LIN
+   224          WRITE  REG-ATR  FROM  MENSAGEM1
+   225             AFTER  ADVANCING  1  LINE
+   226
+   227       ELSE
+   228          MOVE  COD-ENT     TO  CODE-CONTROL
+   229          MOVE  COD-ENT     TO  COD-REL
+   230          MOVE  "EMAIL SEM DESCRICAO"   TO  MENSAGEM
+   231          ADD   2           TO  CT-LIN
+* Microsoft COBOL Version 4.5        L2.4 revision 002 26-Apr-21 01:53 Page   5
+*                                       EX05.CBL
+   232          WRITE  REG-ATR  FROM  DETALHE
+   233             AFTER  ADVANCING  2  LINE
+   234    ELSE
+   235       IF  COD-ENT  NOT EQUAL TO  CODE-CONTROL
+   236          PERFORM REGISOK.
+   237
+   238 CABECALHO.
+   239    MOVE  SPACES   TO  REG-ATR.
+   240    ADD   1        TO  CT-PAG.
+   241    MOVE  CT-PAG   TO  VAR-PAG.
+   242
+   243    WRITE  REG-ATR
+   244       AFTER  ADVANCING  PAGE.
+   245    WRITE  REG-ATR  FROM  CAB-01
+   246       AFTER  ADVANCING  3  LINE.
+   247    WRITE  REG-ATR  FROM  CAB-02
+   248       AFTER  ADVANCING  2  LINES.
+   249    WRITE  REG-ATR  FROM  CAB-03
+   250       AFTER  ADVANCING  1  LINE.
+   251
+   252    MOVE  ZEROS  TO CT-LIN.
+   253
+   254 REGISOK.
+   255    MOVE   RG-ENT     TO   RG-SAI.
+   256    MOVE   NOME-ENT   TO   NOME-SAI.
+   257    MOVE   ESTADO-ENT TO   ESTADO-SAI.
+   258    MOVE   CIDADE-ENT TO   CIDADE-SAI.
+   259    MOVE   EMAIL-ENT  TO   EMAIL-SAI.
+   260    WRITE  REG-SAI.
+   261
+   262 TERMINO.
+   263    CLOSE   REGENT
+   264            CADOK
+   265            RELOCOR.
+* Microsoft COBOL Version 4.5        L2.4 revision 002
+* (C)Copyright Microsoft Corp 1984, 1991       URN AXUPA/MS0/000000
+*                                              REF GNB-024050002A7
+*
+* Total Messages:     0
+* Data:        1860     Code:        1735     Dictionary:        2553
